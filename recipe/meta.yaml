@@ -15,23 +15,31 @@ source:
 build:
   merge_build_host: true  # [win]
   number: 1
-  noarch: generic
+  #noarch: generic
+  # Only building r packages for win64, linux64, osx64
+  skip: True # [aarch64 or s390x or ppc64le or arm64]
+
   rpaths:
     - lib/R/lib/
     - lib/
+
+  # weird error on windows
+  missing_dso_whitelist:
+    - $RPATH/R.dll  # [win]
+
 
 requirements:
   build:
     - {{ posix }}zip               # [win]
   host:
-    - r-base
+    - r-base {{ r_version }} 
     - r-ggplot2 >=3.0.0
     - r-purrr
     - r-scales
     - r-stringr
     - r-tibble
   run:
-    - r-base
+    - r-base {{ r_version }}
     - r-ggplot2 >=3.0.0
     - r-purrr
     - r-scales
@@ -45,7 +53,7 @@ test:
 
 about:
   home: http://github.com/jrnold/ggthemes
-  license: GPL-2
+  license: GPL-2.0
   summary: Some extra themes, geoms, and scales for 'ggplot2'. Provides 'ggplot2' themes and scales that replicate the look of plots by Edward Tufte, Stephen Few, 'Fivethirtyeight', 'The Economist', 'Stata', 'Excel', and 'The Wall Street Journal', among others. Provides 'geoms' for Tufte's box plot and range frame.
   license_family: GPL2
   license_file: {{ environ["PREFIX"] }}/lib/R/share/licenses/GPL-2
@@ -53,6 +61,23 @@ about:
 extra:
   recipe-maintainers:
     - conda-forge/r
+
+  skip-lints:
+    # These are needed because of bug: https://github.com/anaconda-distribution/anaconda-linter/issues/197
+    - http_url
+    - invalid_url
+
+    - host_section_needs_exact_pinnings
+    - missing_dev_url
+    - missing_description
+    - missing_documentation
+
+  anaconda-services:
+    ref:  https://anaconda.zendesk.com/agent/tickets/35116
+    reason: "needed for r-devtools"
+    recipe-maintainers:
+      - bkreider
+
 
 # Package: ggthemes
 # Version: 4.1.1
